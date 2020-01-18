@@ -53,18 +53,18 @@
         <div class="row q-pt-md q-px-md fit justify-center">
           <div class="col-sm-12 q-pt-xl">
              <div class="col-10 q-mb-sm text-right self-center">
-                <q-btn flat size="md" color="dark" label="Alunos"/>
-                <q-btn flat size="md" color="dark" label="Cursos"/>
-                <q-btn flat size="md" color="dark" label="Agenda"/>
-                <q-btn flat size="md" color="dark" label="Aulas"/>
+                <q-btn flat size="md" color="dark" label="Alunos" to="students" />
+                <q-btn flat size="md" color="dark" label="Cursos" to="courses" />
+                <q-btn flat size="md" color="dark" label="Agenda" to="calendar" />
+                <q-btn flat size="md" color="dark" label="Aulas"  to="classes" />
                 <q-btn-dropdown flat size="md" color="dark" label="Financeiro">
                   <q-list>
-                      <q-item clickable v-close-popup @click="onItemClick">
+                      <q-item clickable v-close-popup to="finances">
                           <q-item-section>
                             <q-item-label>Pagamentos</q-item-label>
                           </q-item-section>
                         </q-item>
-                      <q-item clickable v-close-popup @click="onItemClick">
+                      <q-item clickable v-close-popup to="reports">
                         <q-item-section>
                           <q-item-label>Relatórios</q-item-label>
                         </q-item-section>
