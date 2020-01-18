@@ -4,8 +4,8 @@
           <div class="col-8 col-sm-4">
            <q-card class="my-card">
       <q-img src="https://i.pinimg.com/originals/84/8a/9b/848a9b44e8cd21df86edd296d9c8245b.jpg">
-        <div class="absolute-center">
-            <h3>DavidAulas</h3>
+        <div class="text-subtitle2 absolute-top text-center">
+            DavidAulas
         </div>
       </q-img>
       <q-card-section>
@@ -20,6 +20,19 @@
         <q-btn color="primary" label="Entrar" @click="login()"/>
       </q-card-actions>
     </q-card>
+    <q-dialog v-model="show_error" @ok="hideError()" :cancel="false">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Erro de Login</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          Usuário ou senha inválidos
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
           </div>
         </div>
  </q-page>
@@ -31,58 +44,73 @@ export default {
     return {
       username: '',
       password: '',
-      headers: ''
+      show_error: false
     }
   },
 
   computed: {
+
     getHeader () {
-      let headers = {}
-      return headers = {
+      let headers = {
         headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'authorization': 'Basic ' + btoa(process.env.APP_CLIENT_ID + ':' + process.env.APP_CLIENT_SECRET)
+          'content-type': 'application/x-www-form-urlencoded'
+          // 'authorization': 'Basic ' + btoa(process.env.APP_CLIENT_ID + ':' + process.env.APP_CLIENT_SECRET)
         }
       }
-    },
-    // getAuthHeader () {
-    //   let headers = {}
-    //   return headers = {
-    //     headers: {
-    //       'content-type': 'application/json',
-    //       'authorization': 'Basic ' + btoa(process.env.APP_CLIENT_ID + ':' + process.env.APP_CLIENT_SECRET),
-    //       'authorization': 'Bearer ' + this.access_token
-    //     }
-    //   }
-    // }
+      return headers
+    }
   },
 
   methods: {
     login () {
       this.$q.loading.show()
-      let data = {
-        grant_type: 'password',
-        username: this.username,
-        password: this.password
-      }
+      let fd = new FormData()
+      fd.append('grant_type', 'password')
+      fd.append('username', this.username)
+      fd.append('password', this.password)
+      fd.append('client_id', process.env.APP_CLIENT_ID)
+      fd.append('client_secret', process.env.APP_CLIENT_SECRET)
+      this.$axios.post('http://127.0.0.1:8000/o/token/', fd, this.getHeader)
+        .then(response => {
+          window.location = '/students'
+        })
+        .catch(e => {
+          this.$q.loading.hide()
+          this.show_error = true
+          console.log(e)
+        })
+    },
 
-      // this.$axios.post('http://127.0.0.1:8000/o/token/', this.$qs.stringify(data), this.getHeader)
-      //   .then(response => {
-      //     this.$store.dispatch('params/SET_ATTEMPTS', [0])
-      //     this.setUserData(response)
-      //   })
-      //   .catch(e => {
-      //     this.$q.loading.hide()
-      //     this.show_error = true
-
-      //     if (e.response) {
-      //       if (e.response.data.qty_login_attempts) {
-      //         this.$store.dispatch('params/SET_ATTEMPTS', [e.response.data.qty_login_attempts])
-      //       }
-      //     }
-      //     console.log(e)
-      //   })
+    hideError () {
+      this.show_error = false
+      this.custom_error_message = false
     }
+
+  // setUserData(response) {
+  //   this.$store.dispatch('common/SET_ACCESS_TOKEN', [response.data.access_token, response.data.refresh_token, response.data.user_firebase_token])
+  //   if (response.data.user_firebase_token) {
+  //       firebase.auth().signInWithCustomToken(response.data.user_firebase_token)
+  //       .then(() => {
+  //           if (this.$q.platform.is.cordova) {
+  //               this.setUserDeviceToken()
+  //           }
+  //           else {
+  //               this.getWelcomeBanner()
+  //           }
+  //       })
+  //       .catch(e => {
+  //           console.log(e)
+  //       })
+  //   }
+  //   else {
+  //       if (this.$q.platform.is.cordova) {
+  //           this.setUserDeviceToken()
+  //       }
+  //       else {
+  //           this.getWelcomeBanner()
+  //         }
+  //     }
+  //   },
   },
 
   name: 'PageIndex'
@@ -91,6 +119,6 @@ export default {
 
 <style scoped>
 .login {
-  background-color: #999
+  background-color: rgb(190, 189, 189)
 }
 </style>

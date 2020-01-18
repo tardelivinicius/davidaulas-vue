@@ -15,6 +15,7 @@
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
     "dotenv": "^8.2.0",
+    "qs-stringify": "^1.2.0",
     "quasar": "^1.0.0",
     "save-dev": "0.0.1-security",
     "vue-i18n": "^8.0.0"
