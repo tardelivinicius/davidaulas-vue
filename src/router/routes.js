@@ -1,3 +1,4 @@
+import store from '../store'
 
 const routes = [
   {
@@ -16,9 +17,21 @@ const routes = [
       { path: 'classes', component: () => import('pages/classes/Classes.vue') },
       { path: 'finances', component: () => import('pages/finances/Finances.vue') },
       { path: 'reports', component: () => import('pages/reports/Reports.vue') }
-    ]
+    ],
+    beforeEnter: (to, from, next) => {
+      if (!store.getters['common/access_token']) {
+        clearUserData()
+        next({ name: '' })
+      } else {
+        next()
+      }
+    }
   }
 ]
+
+function clearUserData () {
+  store.dispatch('common/SET_ACCESS_TOKEN', ['', ''])
+}
 
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {

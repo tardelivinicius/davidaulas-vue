@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -57,18 +59,35 @@ export default {
       original: []
     }
   },
+
+  computed: {
+    ...mapGetters({
+      access_token: 'common/access_token'
+    }),
+
+    getAuthHeader () {
+      let headers = {
+        headers: {
+          'content-type': 'application/json',
+          // 'authorization': 'Basic ' + btoa(process.env.APP_CLIENT_ID + ':' + process.env.APP_CLIENT_SECRET),
+          'authorization': 'Bearer ' + this.access_token
+        }
+      }
+      return headers
+    }
+  },
   mounted () {
     // get initial data from server (1st page)
     this.onRequest({
       pagination: this.pagination,
       filter: undefined
-    })
+    },
+    this.searchFields())
   },
   methods: {
     onRequest (props) {
       const { page, rowsPerPage, sortBy, descending } = props.pagination
       const filter = props.filter
-
       this.loading = true
 
       // emulate server
@@ -76,16 +95,17 @@ export default {
         // update rowsCount with appropriate value
         this.pagination.rowsNumber = this.getRowsNumberCount(filter)
 
-        // get all rows if "All" (0) is selected
-        const fetchCount = rowsPerPage === 0 ? this.pagination.rowsNumber : rowsPerPage
+        // // get all rows if "All" (0) is selected
+        // const fetchCount = rowsPerPage === 0 ? this.pagination.rowsNumber : rowsPerPage
 
-        // calculate starting row of data
-        const startRow = (page - 1) * rowsPerPage
+        // // calculate starting row of data
+        // const startRow = (page - 1) * rowsPerPage
 
-        // fetch data from "server"
-        const returnedData = this.fetchFromServer(startRow, fetchCount, filter, sortBy, descending)
+        // // fetch data from "server"
+        const returnedData = this.searchFields()
 
-        // clear out existing data and add new
+        console.log(returnedData)
+        // // clear out existing data and add new
         this.data.splice(0, this.data.length, ...returnedData)
 
         // don't forget to update local pagination object
@@ -98,29 +118,18 @@ export default {
         this.loading = false
       }, 1500)
     },
+    searchFields () {
+      this.$axios.get('http://127.0.0.1:8000/api/student/', this.getAuthHeader)
+        .then(response => {
+          this.original = response.data.filter(student => {
+            return {
+              'id': student.id,
+              'name': student.name
+            }
+          })
+        })
 
-    // emulate ajax call
-    // SELECT * FROM ... WHERE...LIMIT...
-    fetchFromServer (startRow, count, filter, sortBy, descending) {
-      const data = filter
-        ? this.original.filter(row => row.name.includes(filter))
-        : this.original.slice()
-
-      // handle sortBy
-      if (sortBy) {
-        const sortFn = sortBy === 'desc'
-          ? (descending
-            ? (a, b) => (a.name > b.name ? -1 : a.name < b.name ? 1 : 0)
-            : (a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0)
-          )
-          : (descending
-            ? (a, b) => (parseFloat(b[sortBy]) - parseFloat(a[sortBy]))
-            : (a, b) => (parseFloat(a[sortBy]) - parseFloat(b[sortBy]))
-          )
-        data.sort(sortFn)
-      }
-
-      return data.slice(startRow, startRow + count)
+      return this.original
     },
 
     // emulate 'SELECT count(*) FROM ...WHERE...'

@@ -49,7 +49,6 @@ export default {
   },
 
   computed: {
-
     getHeader () {
       let headers = {
         headers: {
@@ -72,6 +71,7 @@ export default {
       fd.append('client_secret', process.env.APP_CLIENT_SECRET)
       this.$axios.post('http://127.0.0.1:8000/o/token/', fd, this.getHeader)
         .then(response => {
+          this.$store.dispatch('common/SET_ACCESS_TOKEN', [response.data.access_token, response.data.refresh_token])
           window.location = '/students'
         })
         .catch(e => {
@@ -85,32 +85,6 @@ export default {
       this.show_error = false
       this.custom_error_message = false
     }
-
-  // setUserData(response) {
-  //   this.$store.dispatch('common/SET_ACCESS_TOKEN', [response.data.access_token, response.data.refresh_token, response.data.user_firebase_token])
-  //   if (response.data.user_firebase_token) {
-  //       firebase.auth().signInWithCustomToken(response.data.user_firebase_token)
-  //       .then(() => {
-  //           if (this.$q.platform.is.cordova) {
-  //               this.setUserDeviceToken()
-  //           }
-  //           else {
-  //               this.getWelcomeBanner()
-  //           }
-  //       })
-  //       .catch(e => {
-  //           console.log(e)
-  //       })
-  //   }
-  //   else {
-  //       if (this.$q.platform.is.cordova) {
-  //           this.setUserDeviceToken()
-  //       }
-  //       else {
-  //           this.getWelcomeBanner()
-  //         }
-  //     }
-  //   },
   },
 
   name: 'PageIndex'
