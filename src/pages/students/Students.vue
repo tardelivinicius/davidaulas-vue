@@ -12,7 +12,7 @@
       binary-state-sort
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
@@ -49,11 +49,19 @@ export default {
           sortable: true
         },
         { name: 'Nome do Aluno', align: 'center', label: 'Nome do Aluno', field: 'name', sortable: true },
-        { name: 'Curso', label: 'Curso', field: 'course', sortable: true },
-        { name: 'Valor do Curso (R$)', label: 'Valor do Curso (R$)', field: 'course_value', sortable: true },
+        { name: 'E-mail', label: 'E-mail', field: 'email', sortable: true },
+        { name: 'Nome do Responsável', label: 'Nome do Responsável', field: 'name_responsible', sortable: true },
         { name: 'Data da Matrícula', label: 'Data da Matrícula', field: 'date_joined', sortable: true },
         { name: 'Status', label: 'Status', field: 'status', sortable: true },
-        { name: 'actions', label: '', field: '', sortable: true }
+        { name: 'actions', label: '', field: '', sortable: true },
+        {
+          name: 'act',
+          required: true,
+          label: 'Ações',
+          align: 'left',
+          field: '<q-btn>teste</q-btn>',
+          sortable: true
+        }
       ],
       data: [],
       original: []
@@ -104,7 +112,6 @@ export default {
         // // fetch data from "server"
         const returnedData = this.searchFields()
 
-        console.log(returnedData)
         // // clear out existing data and add new
         this.data.splice(0, this.data.length, ...returnedData)
 
@@ -121,12 +128,7 @@ export default {
     searchFields () {
       this.$axios.get('http://127.0.0.1:8000/api/student/', this.getAuthHeader)
         .then(response => {
-          this.original = response.data.filter(student => {
-            return {
-              'id': student.id,
-              'name': student.name
-            }
-          })
+          this.original = response.data
         })
 
       return this.original

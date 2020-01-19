@@ -7,7 +7,7 @@
         </q-toolbar-title>
         <q-btn-dropdown stretch flat label="Vinícius Valle">
             <q-list>
-                <q-item clickable v-close-popup @click="onItemClick">
+                <q-item clickable v-close-popup>
                   <q-item-side>
                     <q-icon name="far fa-cog" size="1.5rem" />
                   </q-item-side>
@@ -16,7 +16,7 @@
                     </q-item-section>
                   </q-item>
 
-                <q-item clickable v-close-popup @click="onItemClick">
+                <q-item clickable v-close-popup>
                   <q-item-side>
                     <q-icon name="far fa-cog" size="1.5rem" />
                   </q-item-side>
@@ -25,7 +25,7 @@
                   </q-item-section>
                 </q-item>
 
-                <q-item clickable v-close-popup @click="onItemClick">
+                <q-item clickable v-close-popup>
                   <q-item-side>
                     <q-icon name="far fa-cog" size="1.5rem" />
                   </q-item-side>
@@ -36,7 +36,7 @@
 
                 <q-separator inset />
 
-                <q-item clickable v-close-popup @click="onItemClick">
+                <q-item clickable v-close-popup @click="logout()">
                   <q-item-side>
                     <q-icon name="far fa-cog" size="1.5rem" />
                   </q-item-side>
@@ -88,6 +88,13 @@ export default {
   data () {
     return {
       leftDrawerOpen: false
+    }
+  },
+
+  methods: {
+    logout () {
+      this.$store.dispatch('common/SET_ACCESS_TOKEN', ['', ''])
+      window.location = ''
     }
   }
 }
