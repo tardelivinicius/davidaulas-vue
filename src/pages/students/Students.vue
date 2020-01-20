@@ -1,70 +1,147 @@
 <template>
-  <div class="q-pa-md q-pl-xl q-pr-xl">
-    <q-table
-      title="Alunos"
-      :data="data"
-      :columns="columns"
-      row-key="id"
-      :pagination.sync="pagination"
-      :loading="loading"
-      :filter="filter"
-      @request="onRequest"
-      binary-state-sort
-    >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
+  <q-page padding class="q-ma-xl">
+        <q-table
+            :data="students"
+            @request="onRequest"
+            :columns="columns"
+            :pagination.sync="server_pagination"
+            :loading="loading"
+            :filter="filter"
+            row-key="name"
+            :no-data-label="$t('no_data_avaliable')"
+            :no-results-label="$t('no_results_found')"
+            :loading-label="$t('loading_data')"
+            :rows-per-page-label="$t('items_per_page')"
+            :rows-per-page-options="[5,10,50,100]"
+            binary-state-sort
+        >
 
-    </q-table>
-  </div>
+        <template slot="top-right" slot-scope="props" :props="props">
+          <q-search v-model="filter" icon="far fa-search" placeholder="Buscar" />
+        </template>
+
+         <template slot="top" slot-scope="props" :props="props">
+            <q-search v-model="filter" icon="far fa-search" placeholder="Buscar" />
+            <div class="col" />
+            <q-btn color="primary" icon="fas fa-plus" label="Novo" @click="$router.push({ name: 'student', params: { id: 0 } })"/>
+          </template>
+
+          <q-tr slot="header" slot-scope="props" :props="props">
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+            {{ $t(col.label) }}
+            </q-th>
+          </q-tr>
+
+            <q-tr slot="body" slot-scope="props" :props="props">
+                <q-td auto-width key="id" :props="props">
+                    {{ props.row.id }}
+                </q-td>
+
+                <q-td key="name" :props="props">
+                    {{ props.row.name }}
+                </q-td>
+
+                <q-td key="email" :props="props">
+                    {{ props.row.email }}
+                </q-td>
+
+                <q-td key="name_responsible" :props="props">
+                    {{ props.row.name_responsible }}
+                </q-td>
+
+                <q-td key="date_joined" :props="props">
+                    {{ props.row.date_joined }}
+                </q-td>
+                <q-td key="status" :props="props" auto-width>
+                    <q-chip small :icon="getIconStatus(props.row.status)" :color="getColorStatus(props.row.status)" class="full-width">
+                        {{ $t(getStatus(props.row.status)) }}
+                    </q-chip>
+                </q-td>
+                <q-td key="actions" :props="props">
+                    <q-btn flat round color="primary" icon="fas fa-pencil-alt" size='10px' @click="$router.push({ name: 'student', params: { id: props.row.id  } })" />
+                    <q-btn flat round color="negative" icon="fas fa-trash-alt" size='10px' />
+                </q-td>
+            </q-tr>
+        </q-table>
+
+  </q-page>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-
 export default {
   data () {
     return {
-      filter: '',
-      loading: false,
-      pagination: {
-        sortBy: 'desc',
-        descending: false,
+      server_pagination: {
         page: 1,
-        rowsPerPage: 3,
-        rowsNumber: 10
+        rowsNumber: 10,
+        rowsPerPage: 5,
+        descending: false,
+        sortBy: null
       },
+      loading: false,
+      students: [],
       columns: [
         {
-          name: 'desc',
+          name: 'id',
           required: true,
           label: '#',
           align: 'left',
-          field: row => row.id,
-          format: val => `${val}`,
+          field: 'id',
           sortable: true
         },
-        { name: 'Nome do Aluno', align: 'center', label: 'Nome do Aluno', field: 'name', sortable: true },
-        { name: 'E-mail', label: 'E-mail', field: 'email', sortable: true },
-        { name: 'Nome do Responsável', label: 'Nome do Responsável', field: 'name_responsible', sortable: true },
-        { name: 'Data da Matrícula', label: 'Data da Matrícula', field: 'date_joined', sortable: true },
-        { name: 'Status', label: 'Status', field: 'status', sortable: true },
-        { name: 'actions', label: '', field: '', sortable: true },
         {
-          name: 'act',
+          name: 'name',
           required: true,
-          label: 'Ações',
+          label: 'Nome',
           align: 'left',
-          field: '<q-btn>teste</q-btn>',
+          field: 'name',
           sortable: true
+        },
+        {
+          name: 'email',
+          required: true,
+          label: 'E-mail',
+          align: 'left',
+          field: 'email',
+          sortable: true
+        },
+        {
+          name: 'name_responsible',
+          required: true,
+          label: 'Nome do Responsável',
+          align: 'left',
+          field: 'name_responsible',
+          sortable: true
+        },
+        {
+          name: 'date_joined',
+          required: true,
+          label: 'Data da Matrícula',
+          align: 'left',
+          field: 'date_joined',
+          sortable: true
+        },
+        {
+          name: 'status',
+          required: true,
+          label: 'Status',
+          align: 'left',
+          field: 'edit',
+          sortable: false
+        },
+        {
+          name: 'actions',
+          required: true,
+          label: '',
+          align: 'right',
+          field: 'edit',
+          sortable: false
         }
       ],
-      data: [],
-      original: []
+      filter: '',
+      action_id: '',
+      confirm_remove: false
     }
   },
 
@@ -84,68 +161,67 @@ export default {
       return headers
     }
   },
+
   mounted () {
-    // get initial data from server (1st page)
     this.onRequest({
-      pagination: this.pagination,
+      pagination: this.server_pagination,
       filter: undefined
-    },
-    this.searchFields())
+    })
   },
+
   methods: {
-    onRequest (props) {
-      const { page, rowsPerPage, sortBy, descending } = props.pagination
-      const filter = props.filter
+    onRequest ({ pagination }) {
       this.loading = true
+      this.server_pagination = pagination
+      let order = pagination.descending ? '-' : ''
+      let orderBy = pagination.sortBy ? order + pagination.sortBy : ''
 
-      // emulate server
-      setTimeout(() => {
-        // update rowsCount with appropriate value
-        this.pagination.rowsNumber = this.getRowsNumberCount(filter)
-
-        // // get all rows if "All" (0) is selected
-        // const fetchCount = rowsPerPage === 0 ? this.pagination.rowsNumber : rowsPerPage
-
-        // // calculate starting row of data
-        // const startRow = (page - 1) * rowsPerPage
-
-        // // fetch data from "server"
-        const returnedData = this.searchFields()
-
-        // // clear out existing data and add new
-        this.data.splice(0, this.data.length, ...returnedData)
-
-        // don't forget to update local pagination object
-        this.pagination.page = page
-        this.pagination.rowsPerPage = rowsPerPage
-        this.pagination.sortBy = sortBy
-        this.pagination.descending = descending
-
-        // ...and turn of loading indicator
-        this.loading = false
-      }, 1500)
-    },
-    searchFields () {
-      this.$axios.get('http://127.0.0.1:8000/api/student/', this.getAuthHeader)
-        .then(response => {
-          this.original = response.data
-        })
-
-      return this.original
-    },
-
-    // emulate 'SELECT count(*) FROM ...WHERE...'
-    getRowsNumberCount (filter) {
-      if (!filter) {
-        return this.original.length
+      let data = {
+        'page_size': this.server_pagination.rowsPerPage,
+        'page': this.server_pagination.page,
+        'search': this.filter,
+        'ordering': orderBy
       }
-      let count = 0
-      this.original.forEach((treat) => {
-        if (treat.name.includes(filter)) {
-          ++count
-        }
-      })
-      return count
+
+      this.$axios.get('http://127.0.0.1:8000/api/students/?' + JSON.stringify(data), this.getAuthHeader)
+        .then(response => {
+          this.server_pagination.rowsPerPage = response.data.count
+          this.students = []
+          response.data.filter(result => {
+            this.students.push({
+              id: result.id,
+              name: result.name,
+              email: result.email,
+              name_responsible: result.name_responsible,
+              date_joined: result.date_joined,
+              status: result.status
+            })
+          })
+
+          this.loading = false
+        })
+        .catch(e => {
+          this.loading = false
+          console.log(e)
+        })
+    },
+
+    getStatus (status) {
+      if (status === 1) return 'Ativo'
+      else if (status === 2) return 'Inativo'
+      else if (status === 3) return 'Deletado'
+    },
+
+    getIconStatus (status) {
+      if (status === 1) return 'fas fa-check'
+      else if (status === 2) return 'fas fa-ban'
+      else if (status === 3) return 'fas fa-trash-alt'
+    },
+
+    getColorStatus (status) {
+      if (status === 1) return 'positive'
+      else if (status === 2) return 'warning'
+      else if (status === 3) return 'negative'
     }
   }
 }

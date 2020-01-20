@@ -53,10 +53,10 @@
         <div class="row q-pt-md q-px-md fit justify-center">
           <div class="col-sm-12 q-pt-xl">
              <div class="col-10 q-mb-sm text-right self-center">
-                <q-btn flat size="md" color="dark" label="Alunos" to="students" />
-                <q-btn flat size="md" color="dark" label="Cursos" to="courses" />
-                <q-btn flat size="md" color="dark" label="Agenda" to="calendar" />
-                <q-btn flat size="md" color="dark" label="Aulas"  to="classes" />
+                <q-btn flat size="md" color="dark" label="Alunos" @click="$router.push({ name: 'students' })" />
+                <q-btn flat size="md" color="dark" label="Cursos" @click="$router.push({ name: 'courses' })" />
+                <q-btn flat size="md" color="dark" label="Agenda" @click="$router.push({ name: 'calendar' })" />
+                <q-btn flat size="md" color="dark" label="Aulas"  @click="$router.push({ name: 'classes' })" />
                 <q-btn-dropdown flat size="md" color="dark" label="Financeiro">
                   <q-list>
                       <q-item clickable v-close-popup to="finances">
